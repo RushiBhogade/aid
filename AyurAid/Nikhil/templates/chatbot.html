@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayurvedic Chatbot</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .chat-container {
+        width: 100%;
+        max-width: 1500px; /* Adjust max-width for larger screens */
+        height: 100vh; /* Make chat container full-screen */
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+    }
+    .sidebar {
+        width: 300px; /* Set the initial width of the sidebar */
+        background-color: #7f976d; /* Match the color scheme */
+        padding: 20px;
+        transition: width 0.3s ease; /* Add smooth transition for width change */
+    }
+    .sidebar.closed {
+        width: 50px; /* Set the width of the closed sidebar */
+    }
+    .sidebar.closed .menu-items {
+        display: none; /* Hide menu items when sidebar is closed */
+    }
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+    .sidebar-header h3 {
+        margin: 0;
+        color: #fff; /* Match the text color */
+        transition: opacity 0.3s ease; /* Add smooth transition for opacity change */
+    }
+    .sidebar.closed .sidebar-header h3 {
+        opacity: 0; /* Hide menu text when sidebar is closed */
+    }
+    .menu-icon {
+        font-size: 24px;
+        color: #fff; /* Match the text color */
+    }
+    .menu-items {
+        list-style-type: none;
+        padding: 0;
+        display: block; /* Show menu items by default */
+    }
+    .menu-items li {
+        margin-bottom: 10px;
+    }
+    .chat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .chat-header {
+        background-color: #7f976d;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        font-size: 20px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .chat-messages {
+        flex: 1;
+        overflow-y: scroll;
+        padding: 10px;
+    }
+    .message {
+        margin-bottom: 10px;
+    }
+    .message.bot {
+        text-align: left;
+    }
+    .message.user {
+        text-align: right;
+    }
+    .message-text {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 5px;
+    }
+    .logo {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.6; /* Adjust opacity for low transparency */
+        z-index: 1; /* Ensure logo appears above other content */
+    }
+    .message-text.user {
+        background-color: #7f976d;
+        color: #fff;
+    }
+    .chat-input {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-top: 1px solid #ccc;
+    }
+    .chat-input input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box; /* Include padding and border in the input's total width */
+    }
+    .chat-input button {
+        padding: 8px 16px;
+        border-radius: 5px;
+        background-color: #7f976d;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+    <div class="chat-container">
+   
+        <div class="chat-content">
+            <img src="../static/assets/img/AyurAid_logo.png" alt="Logo" class="logo">
+            <div class="chat-header">
+                Ayurvedic Chatbot
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot">
+                    <div class="message-text">Namaste! How can I assist you today?</div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('closed');
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === '') return;
+
+            const chatMessages = document.getElementById('chat-messages');
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user');
+            userMessage.innerHTML = `<div class="message-text user">${userInput}</div>`;
+            chatMessages.appendChild(userMessage);
+
+            try {
+                const response = await fetch('YOUR_API_ENDPOINT', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput })
+                });
+                const data = await response.json();
+
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'bot');
+                botMessage.innerHTML = `<div class="message-text">${data.response}</div>`;
+                chatMessages.appendChild(botMessage);
+
+                document.getElementById('user-input').value = ''; // Clear input box
+                document.getElementById('user-input').focus(); // Focus on input box
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+                document.getElementById('user-input').value = ''; // Clear input box after sending message
+            }
+        });
+    </script>
+</body>
+</html>
